@@ -2,8 +2,8 @@ from PyQt6.QtWidgets import QApplication
 from gui import VotingApp
 import sys
 
-
-def main():
+def main() -> None:
+    """Entry point for the voting application."""
     app = QApplication(sys.argv)
     window = VotingApp()
     window.show()
