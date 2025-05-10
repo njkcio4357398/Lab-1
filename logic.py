@@ -1,37 +1,41 @@
-class VoteTracker:
-    """Class for managing vote tallies."""
+import csv
+import os
+from typing import Dict
 
-    def __init__(self) -> None:
-        """Initialize the vote tracker with candidates."""
-        self.votes = {"Bianca": 0, "Edward": 0, "Felicia": 0}
 
-    def vote(self, candidate: str) -> bool:
-        """
-        Increment vote for a valid candidate.
+class VoteManager:
+    def __init__(self, filename: str = "votes.csv"):
+        self.filename = filename
+        self._votes = {"Bianca": 0, "Edward": 0, "Felicia": 0}
+        self._load_votes()
 
-        Args:
-            candidate (str): The candidate to vote for.
+    def _load_votes(self) -> None:
+        if os.path.exists(self.filename):
+            try:
+                with open(self.filename, mode="r", newline="") as file:
+                    reader = csv.reader(file)
+                    next(reader)  # skip header
+                    for row in reader:
+                        if row[0] in self._votes:
+                            self._votes[row[0]] = int(row[1])
+            except Exception as e:
+                raise IOError(f"Failed to read vote data: {e}")
 
-        Returns:
-            bool: True if vote is cast successfully, False otherwise.
-        """
-        if candidate in self.votes:
-            self.votes[candidate] += 1
-            return True
-        return False
+    def _save_votes(self) -> None:
+        try:
+            with open(self.filename, mode="w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(["Candidate", "Votes"])
+                for candidate, count in self._votes.items():
+                    writer.writerow([candidate, count])
+        except Exception as e:
+            raise IOError(f"Failed to save vote data: {e}")
 
-    def get_results(self) -> dict[str, int]:
-        """
-        Return current vote results.
+    def add_vote(self, candidate: str) -> None:
+        if candidate not in self._votes:
+            raise ValueError("Invalid candidate")
+        self._votes[candidate] += 1
+        self._save_votes()
 
-        Returns:
-            dict[str, int]: Dictionary of candidate names and vote counts.
-        """
-        return self.votes
-
-    def reset(self) -> None:
-        """
-        Reset all vote counts to zero.
-        """
-        for candidate in self.votes:
-            self.votes[candidate] = 0
+    def get_results(self) -> Dict[str, int]:
+        return self._votes.copy()
