@@ -28,18 +28,6 @@ class VoteManager:
             except Exception as e:
                 raise IOError(f"Failed to read vote data: {e}")
 
-    def _load_voters(self) -> None:
-        """Load the list of voters from CSV file."""
-        if os.path.exists(self.voter_file):
-            try:
-                with open(self.voter_file, mode="r", newline="") as file:
-                    reader = csv.reader(file)
-                    next(reader)  # skip header
-                    for row in reader:
-                        self._voters.add(row[0].strip().lower())
-            except Exception as e:
-                raise IOError(f"Failed to read voter data: {e}")
-
     def _save_votes(self) -> None:
         """Save votes to CSV file."""
         try:
@@ -50,17 +38,6 @@ class VoteManager:
                     writer.writerow([candidate, count])
         except Exception as e:
             raise IOError(f"Failed to save vote data: {e}")
-
-    def _save_voters(self) -> None:
-        """Save the list of voters to CSV file."""
-        try:
-            with open(self.voter_file, mode="w", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerow(["Voter"])
-                for voter in sorted(self._voters):
-                    writer.writerow([voter])
-        except Exception as e:
-            raise IOError(f"Failed to save voter data: {e}")
 
     def add_vote(self, candidate: str, voter_name: str) -> None:
         """
